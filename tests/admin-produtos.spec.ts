@@ -126,6 +126,19 @@ test.describe('Painel Administrativo de Produtos - Cenários de Teste', () => {
 
     // 2. Navegar até o painel administrativo
     await page.goto('/admin/produtos', { waitUntil: 'load', timeout: 30000 });
+    await page.waitForTimeout(2000); // Aguarda carregamento inicial
+
+    // Filtrar pelo prefixo na barra de pesquisa para isolar os produtos do teste
+    const searchInput = page.getByPlaceholder('Buscar produtos por nome, descrição ou SKU...');
+    await searchInput.fill(prefix);
+    await page.waitForResponse(
+      (response: any) =>
+        response.url().includes('/api/products/admin') &&
+        response.url().includes(encodeURIComponent(prefix)) &&
+        response.status() === 200,
+      { timeout: 10000 }
+    );
+    await page.waitForTimeout(1000); // Permite ao React atualizar a tabela
 
     // 3. Alterar a exibição para "10 por página"
     const selectExibir = page.locator('select').filter({ hasText: /por página/ });
