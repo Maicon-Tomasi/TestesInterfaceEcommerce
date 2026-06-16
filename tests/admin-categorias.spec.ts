@@ -164,7 +164,7 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
     await page.getByRole('button', { name: 'Gerenciar Categorias' }).click();
 
     // Clicar em editar qualquer categoria da lista
-    const categoryRow = page.locator('div.flex.items-center.justify-between').first();
+    const categoryRow = page.locator('div.flex.items-center.justify-between').filter({ has: page.locator('span.font-bold.text-foreground') }).first();
     const originalName = await categoryRow.locator('span.font-bold.text-foreground').textContent() || '';
     await categoryRow.getByTitle('Editar Categoria').click();
 
