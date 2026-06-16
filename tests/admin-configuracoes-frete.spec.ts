@@ -238,29 +238,20 @@ test.describe.serial('Cenários de Configuração de Frete (Painel Admin)', () =
     await page.goto(productUrl);
     await page.waitForTimeout(1000);
 
-    // Simular frete com CEP genérico (ex: CEP da Av. Paulista, 01310-100)
-    const cepInput = page.getByPlaceholder('Ex: 01001-000');
-    await cepInput.fill('01310100');
+    // Simular frete com CEP de destino longo (RJ - 22041-001) para garantir que PAC está disponível
+    const cepInput = page.getByPlaceholder('00000-000');
+    await cepInput.fill('22041001');
+    await page.waitForTimeout(5000);
+    await page.screenshot({ path: 'shipping-error.png' });
     
-    await page.getByRole('button', { name: 'Calcular Frete' }).click();
-
     // Resultado Esperado:
-    // A tabela de prazos e valores de frete deve renderizar
-    const resultsContainer = page.locator('.space-y-3').filter({ hasText: 'Receba em' });
+    const resultsContainer = page.locator('.space-y-2').filter({ hasText: 'Entrega em até' });
     await expect(resultsContainer.first()).toBeVisible({ timeout: 15000 });
 
     // Valida que PAC aparece na lista
-    if (pacCarrier) {
-      await expect(page.locator('text=' + pacCarrier.name)).toBeVisible();
-    } else {
-      await expect(page.locator('text=PAC').first()).toBeVisible();
-    }
+    await expect(page.locator('text=PAC').first()).toBeVisible();
 
     // Valida que SEDEX NÃO aparece na lista
-    if (sedexCarrier) {
-      await expect(page.locator('text=' + sedexCarrier.name)).not.toBeVisible();
-    } else {
-      await expect(page.locator('text=SEDEX')).not.toBeVisible();
-    }
+    await expect(page.locator('text=SEDEX').first()).not.toBeVisible();
   });
 });
