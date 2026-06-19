@@ -31,6 +31,46 @@ export class ApiHelper {
   }
 
   /**
+   * Registra um novo cliente
+   */
+  async registerCustomer(payload: {
+    name: string;
+    email: string;
+    password: string;
+    document: string;
+    phone: string;
+  }): Promise<any> {
+    const response = await this.request.post(`${apiBase}/auth/register-customer`, {
+      data: payload
+    });
+
+    if (!response.ok()) {
+      const body = await response.text();
+      throw new Error(`Falha ao registrar cliente: ${response.status()} - ${body}`);
+    }
+
+    return await response.json();
+  }
+
+  /**
+   * Efetua login com e-mail e senha de cliente e retorna o token JWT
+   */
+  async loginCustomer(email: string, password: string): Promise<string> {
+    const response = await this.request.post(`${apiBase}/auth/login`, {
+      data: { email, password }
+    });
+
+    if (!response.ok()) {
+      const body = await response.text();
+      throw new Error(`Falha no login do cliente: ${response.status()} - ${body}`);
+    }
+
+    const json = await response.json();
+    this.token = json.token;
+    return this.token!;
+  }
+
+  /**
    * Obtém a contagem de produtos no painel administrativo filtrando por termo
    */
   async getAdminProductsCount(search: string): Promise<number> {
