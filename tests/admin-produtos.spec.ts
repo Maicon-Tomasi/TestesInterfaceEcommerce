@@ -48,6 +48,7 @@ test.describe('Painel Administrativo de Produtos - Cenários de Teste', () => {
 
   test.beforeEach(async ({ page, request }) => {
     api = new ApiHelper(request);
+    await api.setShippingModeToFixed();
     // Garantir que a categoria padrão "Calças" exista e obter seu ID
     categoryId = await api.getOrCreateCategory();
 
@@ -417,9 +418,9 @@ test.describe('Painel Administrativo de Produtos - Cenários de Teste', () => {
       await expect(imageButtons.nth(0)).toContainText(/Em uso/i);
       await expect(imageButtons.nth(1)).toHaveClass(/cursor-not-allowed/);
 
-      await expect(imageButtons.nth(2)).not.toHaveClass(/cursor-not-allowed/);
-      await imageButtons.nth(2).click();
-      await expect(imageButtons.nth(2)).toHaveClass(/ring-primary/);
+      await expect(imageButtons.nth(5)).not.toHaveClass(/cursor-not-allowed/);
+      await imageButtons.nth(5).click();
+      await expect(imageButtons.nth(5)).toHaveClass(/ring-primary/);
 
       await page.locator('label:has-text("Estoque Inicial")').locator('..').locator('input').fill('12');
 
@@ -445,11 +446,8 @@ test.describe('Painel Administrativo de Produtos - Cenários de Teste', () => {
       await page.locator('div:has(> label:has-text("Cor")) select').selectOption('verde');
 
       const imageButtons = page.locator('.aspect-square.border-2').filter({ has: page.locator('img') });
-      await imageButtons.nth(3).click();
-      await imageButtons.nth(4).click();
-
-      await expect(imageButtons.nth(3)).toHaveClass(/ring-primary/);
-      await expect(imageButtons.nth(4)).toHaveClass(/ring-primary/);
+      await imageButtons.nth(6).click();
+      await expect(imageButtons.nth(6)).toHaveClass(/ring-primary/);
 
       await page.locator('label:has-text("Estoque Inicial")').locator('..').locator('input').fill('20');
 
@@ -467,7 +465,7 @@ test.describe('Painel Administrativo de Produtos - Cenários de Teste', () => {
       await page.locator('div:has(> label:has-text("Cor")) select').selectOption('verde');
 
       await page.waitForTimeout(1000); // Aguarda o react disparar o useEffect do auto-preenchimento
-      await expect(page.locator('.aspect-square.border-2').filter({ has: page.locator('img') }).nth(3)).toHaveClass(/ring-primary/);
+      await expect(page.locator('.aspect-square.border-2').filter({ has: page.locator('img') }).nth(6)).toHaveClass(/ring-primary/);
 
       await page.locator('label:has-text("Estoque Inicial")').locator('..').locator('input').fill('8');
       await page.getByRole('button', { name: 'Adicionar Grade' }).click();

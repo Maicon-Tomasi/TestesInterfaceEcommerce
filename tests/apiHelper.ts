@@ -259,4 +259,25 @@ export class ApiHelper {
 
     return await checkoutResponse.json();
   }
+
+  /**
+   * Configura o backend para usar frete fixo. Útil após limpar o banco de dados.
+   */
+  async setShippingModeToFixed(fixedValue: number = 15.0): Promise<void> {
+    const token = await this.loginAdmin();
+    const response = await this.request.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5111'}/api/configuration`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: {
+        shippingMode: 'Fixed',
+        fixedShippingValue: fixedValue,
+        freeShippingThreshold: null,
+        activeShippingCarriers: []
+      }
+    });
+
+    if (!response.ok()) {
+      const body = await response.text();
+      throw new Error(`Falha ao configurar frete fixo: ${response.status()} - ${body}`);
+    }
+  }
 }

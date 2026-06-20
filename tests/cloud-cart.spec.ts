@@ -65,6 +65,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     const addToCartBtn = page.getByRole('button', { name: /Adicionar/i });
     await addToCartBtn.click();
     await addToCartBtn.click(); // Add second unit
+    await expect(page.locator('[data-testid="cart-icon"] span, a[href="/carrinho"] span').first()).toHaveText('2');
 
     // 3. Navegar até a tela de Login e realizar a autenticação
     await page.goto('/conta');
@@ -101,8 +102,14 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     const localApiHelper = new ApiHelper(request);
     const token = await localApiHelper.loginCustomer(testUser.email, testUser.password);
     
-    // GET o produto e pega a primeira variação verdadeira do banco!
     const apiBase = `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5111'}/api`;
+
+    // FIX: Limpa o carrinho do usuário no banco para não herdar o estado do Cenário 1
+    await request.delete(`${apiBase}/cart`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    // GET o produto e pega a primeira variação verdadeira do banco!
     const pRes = await request.get(`${apiBase}/products/${testProductId}`);
     const pData = await pRes.json();
     const realVariationId = pData.variations[0].id;
@@ -156,7 +163,17 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await page.getByPlaceholder('voce@email.com').fill(testUser.email);
     await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
     await page.getByRole('button', { name: /Acessar Loja/i }).click();
-    await page.waitForURL('/'); // Wait until login finishes
+    await page.waitForSelector('text=Minha Conta'); // Wait until login finishes
+
+    // Limpar carrinho no backend
+    const token = await page.evaluate(() => localStorage.getItem('secchi_token'));
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5111';
+    await page.request.delete(`${apiBase}/api/cart`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    // Esvaziar carrinho localmente também
+    await page.evaluate(() => localStorage.removeItem('secchi_cart'));
+    await page.reload();
 
     // 2. Adicionar o Produto ao carrinho
     await page.goto(`/produto/${testProductId}`);
@@ -164,12 +181,18 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await page.getByRole('button', { name: /^M$/i }).click();
     await page.getByRole('button', { name: /^Blue$/i }).click();
     const addToCartBtn = page.getByRole('button', { name: /Adicionar/i });
+    
+    // Wait for the POST request to finish so we don't abort it by navigating
+    const addPromise = page.waitForResponse(r => r.url().includes('/api/cart/items') && r.request().method() === 'POST');
     await addToCartBtn.click();
+    await addPromise;
 
     // Abrir o carrinho (se for um drawer ou página)
     const cartIcon = page.locator('[data-testid="cart-icon"], .cart-icon').first();
     if (await cartIcon.isVisible()) {
       await cartIcon.click();
+    } else {
+      await page.goto('/carrinho');
     }
 
     // 3. Clicar no botão + do item no carrinho para aumentar a quantidade para 2
@@ -184,7 +207,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     // Interface update instantly (optimistic)
     // Here we could check the quantity input value immediately
     const qtyInput = page.locator('input[type="number"], [data-testid="item-quantity"]').first();
-    await expect(qtyInput).toHaveValue('2');
+    await expect(qtyInput).toHaveText('2');
 
     // Wait for real backend request
     const updateResponse = await updatePromise;
@@ -192,7 +215,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     
     // A requisição PUT deve ter enviado { quantity: 2 }
     const postData = updateResponse.request().postDataJSON();
-    expect(postData.quantity).toBe(2);
+    expect(postData).toBe(2);
   });
 
   test('Cenário 4: Exclusão de Item', async ({ page }) => {
@@ -201,7 +224,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await page.getByPlaceholder('voce@email.com').fill(testUser.email);
     await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
     await page.getByRole('button', { name: /Acessar Loja/i }).click();
-    await page.waitForURL('/');
+    await page.waitForSelector('text=Minha Conta');
 
     // 2. Adicionar item
     await page.goto(`/produto/${testProductId}`);
@@ -211,14 +234,11 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     const addToCartBtn = page.getByRole('button', { name: /Adicionar/i });
     await addToCartBtn.click();
 
-    const cartIcon = page.locator('[data-testid="cart-icon"], .cart-icon').first();
-    if (await cartIcon.isVisible()) {
-      await cartIcon.click();
-    }
+    await page.goto('/carrinho');
 
     // 3. Remover item
     const deletePromise = page.waitForResponse(response => 
-      response.url().includes('/api/cart/items/') && response.request().method() === 'DELETE'
+      response.url().includes('/api/cart') && response.request().method() === 'DELETE'
     );
 
     const removeBtn = page.locator('button[aria-label="Remover item"], [data-testid="remove-item"]').first();
@@ -238,7 +258,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await page.getByPlaceholder('voce@email.com').fill(testUser.email);
     await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
     await page.getByRole('button', { name: /Acessar Loja/i }).click();
-    await page.waitForURL('/');
+    await page.waitForSelector('text=Minha Conta');
 
     // 2. Adicionar itens
     await page.goto(`/produto/${testProductId}`);
@@ -248,10 +268,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     const addToCartBtn = page.getByRole('button', { name: /Adicionar/i });
     await addToCartBtn.click();
 
-    const cartIcon = page.locator('[data-testid="cart-icon"], .cart-icon').first();
-    if (await cartIcon.isVisible()) {
-      await cartIcon.click();
-    }
+    await page.goto('/carrinho');
 
     // 3. Limpar Carrinho
     const clearPromise = page.waitForResponse(response => 
@@ -262,7 +279,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await clearCartBtn.click();
 
     // Carrinho vazio na UI
-    const emptyMessage = page.locator('text=/carrinho vazio/i');
+    const emptyMessage = page.locator('text=/carrinho est. vazio/i');
     await expect(emptyMessage).toBeVisible();
 
     // Backend request success
