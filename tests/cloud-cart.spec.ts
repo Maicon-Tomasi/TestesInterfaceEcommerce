@@ -232,7 +232,9 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await page.getByRole('button', { name: /^M$/i }).click();
     await page.getByRole('button', { name: /^Blue$/i }).click();
     const addToCartBtn = page.getByRole('button', { name: /Adicionar/i });
+    const addPromise = page.waitForResponse(r => r.url().includes('/api/cart/items') && r.request().method() === 'POST');
     await addToCartBtn.click();
+    await addPromise;
 
     await page.goto('/carrinho');
 
@@ -266,7 +268,9 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await page.getByRole('button', { name: /^M$/i }).click();
     await page.getByRole('button', { name: /^Blue$/i }).click();
     const addToCartBtn = page.getByRole('button', { name: /Adicionar/i });
+    const addPromise = page.waitForResponse(r => r.url().includes('/api/cart/items') && r.request().method() === 'POST');
     await addToCartBtn.click();
+    await addPromise;
 
     await page.goto('/carrinho');
 
@@ -279,7 +283,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await clearCartBtn.click();
 
     // Carrinho vazio na UI
-    const emptyMessage = page.locator('text=/carrinho est. vazio/i');
+    const emptyMessage = page.getByRole('heading', { name: /carrinho está vazio/i });
     await expect(emptyMessage).toBeVisible();
 
     // Backend request success
