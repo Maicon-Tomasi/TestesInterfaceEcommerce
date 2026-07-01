@@ -50,11 +50,11 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
 
   test('Cenário 1: Sincronização Real ao realizar Login (Envio do Carrinho Local)', async ({ page }) => {
     // 1. Acessar a aplicação deslogado.
-    await page.goto('/');
+    await page.goto('/', { timeout: 60000, waitUntil: 'load' });
 
     // 2. Adicionar 2 unidades da variação do Produto de Teste ao carrinho.
     // Assuming we navigate to the product page and add to cart
-    await page.goto(`/produto/${testProductId}`);
+    await page.goto(`/produto/${testProductId}`, { timeout: 60000, waitUntil: 'load' });
     // Wait for the page to load the product
     await page.waitForSelector(`text=Cloud Cart Test Product`);
     
@@ -68,7 +68,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await expect(page.locator('[data-testid="cart-icon"] span, a[href="/carrinho"] span').first()).toHaveText('2');
 
     // 3. Navegar até a tela de Login e realizar a autenticação
-    await page.goto('/conta');
+    await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
     await page.getByPlaceholder('voce@email.com').fill(testUser.email);
     await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
 
@@ -131,7 +131,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     // but page is clean here since we didn't login on `page` in this test yet)
     
     // 3. Acessar aplicação deslogado e adicionar mais 1 unidade
-    await page.goto(`/produto/${testProductId}`);
+    await page.goto(`/produto/${testProductId}`, { timeout: 60000, waitUntil: 'load' });
     await page.waitForSelector(`text=Cloud Cart Test Product`);
     await page.getByRole('button', { name: /^M$/i }).click();
     await page.getByRole('button', { name: /^Blue$/i }).click();
@@ -139,7 +139,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await addToCartBtn.click(); // Add 1 unit local
 
     // 4. Fazer o Login com a mesma conta
-    await page.goto('/conta');
+    await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
     await page.getByPlaceholder('voce@email.com').fill(testUser.email);
     await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
 
@@ -159,7 +159,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
 
   test('Cenário 3: Ajuste Otimista ao Atualizar Quantidade Logado', async ({ page }) => {
     // 1. Logar na aplicação
-    await page.goto('/conta');
+    await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
     await page.getByPlaceholder('voce@email.com').fill(testUser.email);
     await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
     await page.getByRole('button', { name: /Acessar Loja/i }).click();
@@ -176,7 +176,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await page.reload();
 
     // 2. Adicionar o Produto ao carrinho
-    await page.goto(`/produto/${testProductId}`);
+    await page.goto(`/produto/${testProductId}`, { timeout: 60000, waitUntil: 'load' });
     await page.waitForSelector(`text=Cloud Cart Test Product`);
     await page.getByRole('button', { name: /^M$/i }).click();
     await page.getByRole('button', { name: /^Blue$/i }).click();
@@ -192,7 +192,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     if (await cartIcon.isVisible()) {
       await cartIcon.click();
     } else {
-      await page.goto('/carrinho');
+      await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
     }
 
     // 3. Clicar no botão + do item no carrinho para aumentar a quantidade para 2
@@ -220,14 +220,14 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
 
   test('Cenário 4: Exclusão de Item', async ({ page }) => {
     // 1. Logar na aplicação
-    await page.goto('/conta');
+    await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
     await page.getByPlaceholder('voce@email.com').fill(testUser.email);
     await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
     await page.getByRole('button', { name: /Acessar Loja/i }).click();
     await page.waitForSelector('text=Minha Conta');
 
     // 2. Adicionar item
-    await page.goto(`/produto/${testProductId}`);
+    await page.goto(`/produto/${testProductId}`, { timeout: 60000, waitUntil: 'load' });
     await page.waitForSelector(`text=Cloud Cart Test Product`);
     await page.getByRole('button', { name: /^M$/i }).click();
     await page.getByRole('button', { name: /^Blue$/i }).click();
@@ -236,7 +236,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await addToCartBtn.click();
     await addPromise;
 
-    await page.goto('/carrinho');
+    await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
 
     // 3. Remover item
     const deletePromise = page.waitForResponse(response => 
@@ -256,14 +256,14 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
 
   test('Cenário 5: Limpeza Total do Carrinho (Clear Cart)', async ({ page }) => {
     // 1. Logar na aplicação
-    await page.goto('/conta');
+    await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
     await page.getByPlaceholder('voce@email.com').fill(testUser.email);
     await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
     await page.getByRole('button', { name: /Acessar Loja/i }).click();
     await page.waitForSelector('text=Minha Conta');
 
     // 2. Adicionar itens
-    await page.goto(`/produto/${testProductId}`);
+    await page.goto(`/produto/${testProductId}`, { timeout: 60000, waitUntil: 'load' });
     await page.waitForSelector(`text=Cloud Cart Test Product`);
     await page.getByRole('button', { name: /^M$/i }).click();
     await page.getByRole('button', { name: /^Blue$/i }).click();
@@ -272,7 +272,7 @@ test.describe.serial('Cloud Cart (E2E Real)', () => {
     await addToCartBtn.click();
     await addPromise;
 
-    await page.goto('/carrinho');
+    await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
 
     // 3. Limpar Carrinho
     const clearPromise = page.waitForResponse(response => 

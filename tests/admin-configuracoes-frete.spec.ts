@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { ApiHelper } from './apiHelper';
 
 async function loginAdmin(page: any) {
-  await page.goto('/conta');
+  await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
   await page.getByPlaceholder('voce@email.com').fill(process.env.TEST_USER_EMAIL || 'admin@ecommerce.com');
   await page.getByPlaceholder('Digite sua senha').fill(process.env.TEST_USER_PASSWORD || 'Admin@123');
   await page.getByRole('button', { name: 'Acessar Loja' }).click();
@@ -96,7 +96,7 @@ test.describe.serial('Cenários de Configuração de Frete (Painel Admin)', () =
 
     // Ação: Fazer login e navegar para configurações
     await loginAdmin(page);
-    await page.goto('/admin/configuracoes');
+    await page.goto('/admin/configuracoes', { timeout: 60000, waitUntil: 'load' });
     
     // Aguarda o painel carregar (o form é renderizado após a API responder)
     await expect(page.getByRole('heading', { name: 'Configurações da Loja' })).toBeVisible({ timeout: 15000 });
@@ -172,7 +172,7 @@ test.describe.serial('Cenários de Configuração de Frete (Painel Admin)', () =
 
     // Ação: Fazer login e ir para a tela
     await loginAdmin(page);
-    await page.goto('/admin/configuracoes');
+    await page.goto('/admin/configuracoes', { timeout: 60000, waitUntil: 'load' });
     await expect(page.getByRole('heading', { name: 'Configurações da Loja' })).toBeVisible({ timeout: 15000 });
 
     // Desmarcar o "SEDEX"

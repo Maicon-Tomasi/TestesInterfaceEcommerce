@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 async function loginAdmin(page: any) {
-  await page.goto('/conta');
+  await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
   await page.getByPlaceholder('voce@email.com').fill(process.env.TEST_USER_EMAIL || 'admin@ecommerce.com');
   await page.getByPlaceholder('Digite sua senha').fill(process.env.TEST_USER_PASSWORD || 'Admin@123');
   await page.getByRole('button', { name: 'Acessar Loja' }).click();
@@ -111,7 +111,7 @@ test.describe.serial('Testes de Configurações Dinâmicas (Frete Fixo e Banner 
     await loginAdmin(page);
 
     // 2. Acessar configurações
-    await page.goto('/admin/configuracoes');
+    await page.goto('/admin/configuracoes', { timeout: 60000, waitUntil: 'load' });
     await expect(page.getByRole('heading', { name: 'Configurações da Loja' })).toBeVisible({ timeout: 15000 });
 
     // 3. Selecionar modo de cálculo Frete Fixo
@@ -155,7 +155,7 @@ test.describe.serial('Testes de Configurações Dinâmicas (Frete Fixo e Banner 
 
   test('Cenário 2: Exibição Dinâmica do Banner na Home Page', async ({ page }) => {
     // Parte A - Banner Ativo:
-    await page.goto('/');
+    await page.goto('/', { timeout: 60000, waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     // Verificar se o Hero Section está renderizado com o texto configurado
@@ -180,7 +180,7 @@ test.describe.serial('Testes de Configurações Dinâmicas (Frete Fixo e Banner 
     // Parte B - Banner Inativo:
     // Retornar ao painel administrativo de configurações
     await loginAdmin(page);
-    await page.goto('/admin/configuracoes');
+    await page.goto('/admin/configuracoes', { timeout: 60000, waitUntil: 'load' });
 
     // Desativar checkbox usando { force: true } devido ao overlay do design sr-only
     const checkbox = page.locator('label:has-text("Ativo") input[type="checkbox"]');
@@ -191,7 +191,7 @@ test.describe.serial('Testes de Configurações Dinâmicas (Frete Fixo e Banner 
     await expect(page.locator('text=Configurações salvas e sincronizadas com sucesso no banco de dados!')).toBeVisible();
 
     // Acessar Home
-    await page.goto('/');
+    await page.goto('/', { timeout: 60000, waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     // Garantir que a seção Hero não é exibida (o h1 do banner deve sumir)
@@ -220,7 +220,7 @@ test.describe.serial('Testes de Configurações Dinâmicas (Frete Fixo e Banner 
     expect(configResponse.ok()).toBeTruthy();
 
     // Limpar o carrinho antes do teste
-    await page.goto('/carrinho');
+    await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
     await page.evaluate(() => localStorage.removeItem('secchi_cart'));
 
     // Passos (Parte A - Subtotal Abaixo do Threshold):
@@ -234,7 +234,7 @@ test.describe.serial('Testes de Configurações Dinâmicas (Frete Fixo e Banner 
     await expect(page.locator('text=Produto adicionado ao carrinho com sucesso!')).toBeVisible();
 
     // 2. Acessar o carrinho
-    await page.goto('/carrinho');
+    await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     // Validações Parte A:
@@ -294,7 +294,7 @@ test.describe.serial('Testes de Configurações Dinâmicas (Frete Fixo e Banner 
     expect(configCalculatedResponse.ok()).toBeTruthy();
 
     // 2. Retornar ao carrinho
-    await page.goto('/carrinho');
+    await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     // Validações Parte C:

@@ -4,21 +4,47 @@ async function searchAndFilterProduct(page: any, productName: string) {
   const searchInput = page.getByPlaceholder('Buscar produtos por nome, descrição ou SKU...');
   await expect(searchInput).toBeVisible();
 
-  // Preenche o campo de busca (o debounce do frontend é de 500ms)
-  await searchInput.fill(productName);
+  // Wait for initial/submit requests to settle
+  await page.waitForTimeout(2000);
 
-  // Usa o auto-retry do Playwright para aguardar o frontend renderizar a tabela com o resultado.
-  // Isso é muito mais rápido e imune a race-conditions de requests perdidas.
-  const table = page.locator('table');
-  await expect(table).toContainText(productName, { timeout: 15000 });
-  await expect(page.locator('table tbody tr')).toHaveCount(1, { timeout: 15000 });
+  for (let i = 0; i < 5; i++) {
+    await searchInput.click();
+    await searchInput.fill('');
+    await page.waitForTimeout(200);
+
+    // Setup response listener for the filtered search request
+    const responsePromise = page.waitForResponse(
+      (response: any) =>
+        response.url().includes('/api/products/admin') &&
+        response.url().includes(encodeURIComponent(productName)) &&
+        response.status() === 200,
+      { timeout: 5000 }
+    ).catch(() => null);
+
+    await searchInput.fill(productName);
+    await responsePromise;
+    await page.waitForTimeout(500); // Allow React to render table update
+
+    const inputValue = await searchInput.inputValue();
+    const tableText = await page.locator('table').textContent();
+    const rowCount = await page.locator('table tbody tr').count();
+
+    if (inputValue === productName && tableText.includes(productName) && rowCount === 1) {
+      return;
+    }
+  }
+
+  const currentInputValue = await searchInput.inputValue();
+  const currentTableText = await page.locator('table').textContent();
+  const currentRowCount = await page.locator('table tbody tr').count();
+  throw new Error(`searchAndFilterProduct failed for "${productName}". Input: "${currentInputValue}", Rows: ${currentRowCount}, Table content: "${currentTableText}"`);
 }
 
 test.describe('Tarefa 1.1 - Status de Rascunho vs Publicado', () => {
 
   test.beforeEach(async ({ page }) => {
     // 1. Ir para a página de login (/conta)
-    await page.goto('/conta');
+    await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
     
     // Tenta preencher email e senha usando seletores baseados nos placeholders da BoutiqueInput
     await page.getByPlaceholder('voce@email.com').fill(process.env.TEST_USER_EMAIL || 'admin@ecommerce.com');

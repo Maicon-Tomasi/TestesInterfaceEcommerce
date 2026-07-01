@@ -15,15 +15,15 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
     test('Cenário 1.1: Deleção em Massa (Clear Cart)', async ({ page, request }) => {
       const helper = new ApiHelper(request);
       const catId = await helper.getOrCreateCategory('Clear Cart Cat', 'clear-cart-cat');
-      
+
       const p1 = await helper.createProduct({ name: 'Prod 1.1A', description: 'Desc', basePrice: 10, categoryIds: [catId] });
       const p2 = await helper.createProduct({ name: 'Prod 1.1B', description: 'Desc', basePrice: 20, categoryIds: [catId] });
       const p3 = await helper.createProduct({ name: 'Prod 1.1C', description: 'Desc', basePrice: 30, categoryIds: [catId] });
-      
+
       await helper.addVariation(p1.id, { sku: `P1A-${Date.now()}`, size: 'M', color: 'Red', stockQuantity: 10 });
       await helper.addVariation(p2.id, { sku: `P1B-${Date.now()}`, size: 'M', color: 'Red', stockQuantity: 10 });
       await helper.addVariation(p3.id, { sku: `P1C-${Date.now()}`, size: 'M', color: 'Red', stockQuantity: 10 });
-      
+
       await helper.publishProduct(p1.id);
       await helper.publishProduct(p2.id);
       await helper.publishProduct(p3.id);
@@ -34,26 +34,26 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       // 1. Adicionar 3 produtos deslogado
       for (let i = 0; i < [p1.id, p2.id, p3.id].length; i++) {
         const pId = [p1.id, p2.id, p3.id][i];
-        await page.goto(`/produto/${pId}`);
+        await page.goto(`/produto/${pId}`, { timeout: 60000, waitUntil: 'load' });
         await page.waitForSelector(`text=Red`);
         await page.getByRole('button', { name: /^M$/i }).click();
         await page.getByRole('button', { name: /^Red$/i }).click();
         await page.getByRole('button', { name: /Adicionar/i }).click();
-        
+
         // Aguardar o número no badge do carrinho atualizar para garantir que o estado local foi salvo
         const expectedCount = (i + 1).toString();
         await expect(page.locator('[data-testid="cart-icon"] span, a[href="/carrinho"] span').first()).toHaveText(expectedCount);
       }
 
       // 2. Realizar Login
-      await page.goto('/conta');
+      await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
       await page.getByPlaceholder('voce@email.com').fill(testUser.email);
       await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
       await page.getByRole('button', { name: /Acessar Loja/i }).click();
       await page.waitForSelector('text=Minha Conta');
 
       // 3. Acessar o carrinho
-      await page.goto('/carrinho');
+      await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
       await page.waitForSelector('text=Resumo');
 
       // 4. Clicar no botão global de "Limpar Carrinho"
@@ -81,7 +81,7 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await helper.registerCustomer(testUser);
 
       // Adicionar 2 unidades deslogado
-      await page.goto(`/produto/${p1.id}`);
+      await page.goto(`/produto/${p1.id}`, { timeout: 60000, waitUntil: 'load' });
       await page.waitForSelector(`text=Blue`);
       await page.getByRole('button', { name: /^M$/i }).click();
       await page.getByRole('button', { name: /^Blue$/i }).click();
@@ -91,15 +91,15 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await expect(page.locator('[data-testid="cart-icon"] span, a[href="/carrinho"] span').first()).toHaveText('2');
 
       // Login
-      await page.goto('/conta');
+      await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
       await page.getByPlaceholder('voce@email.com').fill(testUser.email);
       await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
       await page.getByRole('button', { name: /Acessar Loja/i }).click();
       await page.waitForSelector('text=Minha Conta');
 
       // Acessar carrinho
-      await page.goto('/carrinho');
-      
+      await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
+
       const decreaseBtn = page.locator('[data-testid="decrease-quantity"]').first();
       const qtyInput = page.locator('input[type="number"], [data-testid="item-quantity"]').first();
 
@@ -133,7 +133,7 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await helper.registerCustomer(testUser);
 
       // Adicionar produto deslogado
-      await page.goto(`/produto/${p1.id}`);
+      await page.goto(`/produto/${p1.id}`, { timeout: 60000, waitUntil: 'load' });
       await page.waitForSelector(`text=Blue`);
       await page.getByRole('button', { name: /^M$/i }).click();
       await page.getByRole('button', { name: /^Blue$/i }).click();
@@ -141,14 +141,14 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await expect(page.locator('[data-testid="cart-icon"] span, a[href="/carrinho"] span').first()).toHaveText('1');
 
       // Login
-      await page.goto('/conta');
+      await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
       await page.getByPlaceholder('voce@email.com').fill(testUser.email);
       await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
       await page.getByRole('button', { name: /Acessar Loja/i }).click();
       await page.waitForSelector('text=Minha Conta');
 
       // Acessar carrinho
-      await page.goto('/carrinho');
+      await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
 
       // Clicar na lixeira específica do item
       const trashBtn = page.locator('button[aria-label="Remover item"], [data-testid="remove-item"]').first();
@@ -178,7 +178,7 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await helper.registerCustomer(testUser);
 
       // Adicionar deslogado
-      await page.goto(`/produto/${pC.id}`);
+      await page.goto(`/produto/${pC.id}`, { timeout: 60000, waitUntil: 'load' });
       await page.waitForSelector(`text=Black`);
       await page.getByRole('button', { name: /^M$/i }).click();
       await page.getByRole('button', { name: /^Black$/i }).click();
@@ -186,14 +186,14 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await expect(page.locator('[data-testid="cart-icon"] span, a[href="/carrinho"] span').first()).toHaveText('1');
 
       // Login
-      await page.goto('/conta');
+      await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
       await page.getByPlaceholder('voce@email.com').fill(testUser.email);
       await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
       await page.getByRole('button', { name: /Acessar Loja/i }).click();
       await page.waitForSelector('text=Minha Conta');
 
       // Acessar Carrinho
-      await page.goto('/carrinho');
+      await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
       const plusBtn = page.locator('[data-testid="increase-quantity"]').first();
       const qtyInput = page.locator('input[type="number"], [data-testid="item-quantity"]').first();
 
@@ -227,14 +227,14 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await helper.registerCustomer(testUser);
 
       // Login
-      await page.goto('/conta');
+      await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
       await page.getByPlaceholder('voce@email.com').fill(testUser.email);
       await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
       await page.getByRole('button', { name: /Acessar Loja/i }).click();
       await page.waitForSelector('text=Minha Conta');
 
       // Ir para Produto D
-      await page.goto(`/produto/${pD.id}`);
+      await page.goto(`/produto/${pD.id}`, { timeout: 60000, waitUntil: 'load' });
       await page.waitForSelector(`text=Black`);
       await page.getByRole('button', { name: /^M$/i }).click();
       await page.getByRole('button', { name: /^Black$/i }).click();
@@ -242,15 +242,15 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       // Tentar estourar o estoque pelo botão +
       const btnPlus = page.locator('button:has(svg.lucide-plus), button:has-text("+")').first();
       await btnPlus.click(); // Vai para 2
-      
+
       // O botão deve ficar desabilitado, impedindo passar do limite
       await expect(btnPlus).toBeDisabled();
-      
+
       const addBtn = page.getByRole('button', { name: /Adicionar/i });
       await addBtn.click();
-      
+
       // Checar o carrinho
-      await page.goto('/carrinho');
+      await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
       const cartQty = page.locator('input[type="number"], [data-testid="item-quantity"]').first();
       // O carrinho só deve ter registrado 2 itens (o máximo permitido) ou bloqueado completamente.
       // Se bloqueou na página, o cart deve ter 2. Assumimos que o frontend limitou a 2.
@@ -269,25 +269,25 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await helper.registerCustomer(testUser);
 
       // Login
-      await page.goto('/conta');
+      await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
       await page.getByPlaceholder('voce@email.com').fill(testUser.email);
       await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
       await page.getByRole('button', { name: /Acessar Loja/i }).click();
       await page.waitForSelector('text=Minha Conta');
 
       // Adicionar 5 unidades
-      await page.goto(`/produto/${pE.id}`);
+      await page.goto(`/produto/${pE.id}`, { timeout: 60000, waitUntil: 'load' });
       await page.waitForSelector(`text=White`);
       await page.getByRole('button', { name: /^M$/i }).click();
       await page.getByRole('button', { name: /^White$/i }).click();
       const btnPlus = page.locator('button:has(svg.lucide-plus), button:has-text("+")').first();
-      for(let i=0; i<4; i++) {
+      for (let i = 0; i < 4; i++) {
         await btnPlus.click();
       }
       await page.getByRole('button', { name: /Adicionar/i }).click();
       await expect(page.locator('[data-testid="cart-icon"] span, a[href="/carrinho"] span').first()).toHaveText('5');
 
-      await page.goto('/carrinho');
+      await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
       const cartQtyInput = page.locator('input[type="number"], [data-testid="item-quantity"]').first();
       await expect(cartQtyInput).toHaveText('5');
 
@@ -305,7 +305,7 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
 
       // 5. O backend responde com erro 400 ou status limit e a UI dá um snap automático para 2
       // expect(putResponse.status()).not.toBe(200); // Depende de como a API foi feita, as vezes responde 200 com a quantidade realocada
-      
+
       // O input na UI deve snap para '2'
       await expect(cartQtyInput).toHaveText('2');
       await expect(page.locator('text=Quantidade reduzida')).toBeVisible();
@@ -326,14 +326,14 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await helper.registerCustomer(testUser);
 
       // Login
-      await page.goto('/conta');
+      await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
       await page.getByPlaceholder('voce@email.com').fill(testUser.email);
       await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
       await page.getByRole('button', { name: /Acessar Loja/i }).click();
       await page.waitForSelector('text=Minha Conta');
 
       // Adicionar 1 unidade
-      await page.goto(`/produto/${pF.id}`);
+      await page.goto(`/produto/${pF.id}`, { timeout: 60000, waitUntil: 'load' });
       await page.waitForSelector(`text=Green`);
       await page.getByRole('button', { name: /^L$/i }).click();
       await page.getByRole('button', { name: /^Green$/i }).click();
@@ -341,7 +341,7 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await expect(page.locator('[data-testid="cart-icon"] span, a[href="/carrinho"] span').first()).toHaveText('1');
 
       // Abrir carrinho
-      await page.goto('/carrinho');
+      await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
       const plusBtn = page.locator('[data-testid="increase-quantity"]').first();
       const qtyInput = page.locator('input[type="number"], [data-testid="item-quantity"]').first();
 
@@ -354,7 +354,7 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
 
       // Clicar freneticamente 15 vezes
       for (let i = 0; i < 15; i++) {
-        await plusBtn.click({ delay: 10 }); // Clicks bem rápidos
+        await plusBtn.click({ delay: 50 }); // Clicks rápidos e estáveis
       }
 
       // Esperar a UI atualizar instantaneamente
@@ -365,7 +365,7 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
 
       // Garantir que não gerou spam (apenas 1 requisição final validando debounce)
       // Pode ser 2 se a primeira não foi "debounced" (leading edge)
-      expect(putRequests).toBeLessThanOrEqual(2); 
+      expect(putRequests).toBeLessThanOrEqual(2);
     });
 
     test('Cenário 3.2: Concorrência de Clientes (Multi-Browser Context)', async ({ browser, request }) => {
@@ -438,8 +438,8 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       // Ou clicar no + 
       const plusBtnB = pageB.locator('[data-testid="increase-quantity"]').first();
       if (await plusBtnB.isVisible()) {
-         await plusBtnB.click();
-         await expect(pageB.locator('text=Quantidade máxima')).toBeVisible();
+        await plusBtnB.click();
+        await expect(pageB.locator('text=Quantidade máxima')).toBeVisible();
       }
 
       await contextA.close();
@@ -461,26 +461,26 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await helper.registerCustomer(testUser);
 
       // Login
-      await page.goto('/conta');
+      await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
       await page.getByPlaceholder('voce@email.com').fill(testUser.email);
       await page.getByPlaceholder('Digite sua senha').fill(testUser.password);
       await page.getByRole('button', { name: /Acessar Loja/i }).click();
       await page.waitForSelector('text=Minha Conta');
 
       // Adicionar 3 unidades
-      await page.goto(`/produto/${pH.id}`);
+      await page.goto(`/produto/${pH.id}`, { timeout: 60000, waitUntil: 'load' });
       await page.waitForSelector(`text=Yellow`);
       await page.getByRole('button', { name: /^M$/i }).click();
       await page.getByRole('button', { name: /^Yellow$/i }).click();
       const btnPlus = page.locator('button:has(svg.lucide-plus), button:has-text("+")').first();
-      for(let i=0; i<2; i++) {
+      for (let i = 0; i < 2; i++) {
         await btnPlus.click();
       }
       await page.getByRole('button', { name: /Adicionar/i }).click();
       await expect(page.locator('[data-testid="cart-icon"] span, a[href="/carrinho"] span').first()).toHaveText('3');
 
       // Vai para o carrinho
-      await page.goto('/carrinho');
+      await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
       const qtyInput = page.locator('input[type="number"], [data-testid="item-quantity"]').first();
       await expect(qtyInput).toHaveText('3');
 

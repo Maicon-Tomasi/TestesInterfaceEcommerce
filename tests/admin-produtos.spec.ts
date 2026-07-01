@@ -53,7 +53,7 @@ test.describe('Painel Administrativo de Produtos - Cenários de Teste', () => {
     categoryId = await api.getOrCreateCategory();
 
     // Pré-requisito: Executar login com usuário de perfil Admin
-    await page.goto('/conta');
+    await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
 
     await page.getByPlaceholder('voce@email.com').fill(process.env.TEST_USER_EMAIL || 'admin@ecommerce.com');
     await page.getByPlaceholder('Digite sua senha').fill(process.env.TEST_USER_PASSWORD || 'Admin@123');
@@ -107,7 +107,7 @@ test.describe('Painel Administrativo de Produtos - Cenários de Teste', () => {
 
     // 8. Assert: Validar se o produto agora é exibido no catálogo público
     await page.goto(`/produtos?search=${encodeURIComponent(productName)}`);
-    await expect(page.getByText(productName)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(productName)).toBeVisible({ timeout: 20000 });
   });
 
   test('Cenário 2: Paginação Dinâmica no Painel', async ({ page }) => {

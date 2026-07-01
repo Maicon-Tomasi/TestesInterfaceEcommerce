@@ -12,12 +12,12 @@ async function loginAdmin(page: any) {
   page.on('response', async (res: any) => {
     if (res.url().includes('/api')) {
       let bodyText = '';
-      try { bodyText = await res.text(); } catch {}
+      try { bodyText = await res.text(); } catch { }
       console.log(`[NET RES] ${res.status()} ${res.url()} -> ${bodyText.substring(0, 300)}`);
     }
   });
 
-  await page.goto('/conta');
+  await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });
   await page.getByPlaceholder('voce@email.com').fill(process.env.TEST_USER_EMAIL || 'admin@ecommerce.com');
   await page.getByPlaceholder('Digite sua senha').fill(process.env.TEST_USER_PASSWORD || 'Admin@123');
   await page.getByRole('button', { name: 'Acessar Loja' }).click();
@@ -31,11 +31,11 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
   let apiBase: string;
   let testCategoryId: string;
   let errorCategoryName: string;
-  
+
   const tempEditCategoryName = `Calças E2E ${Date.now()}`;
   const tempEditCategorySlug = `calcas-e2e-${Date.now()}`;
   const finalEditCategoryName = `Calças de Alfaiataria E2E ${Date.now()}`;
-  
+
   const newCategoryName = `Acessórios Especiais ${Date.now()}`;
 
   test.beforeAll(async ({ request }) => {
@@ -66,7 +66,7 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
     await loginAdmin(page);
 
     // 2. Acessar produtos admin
-    await page.goto('/admin/produtos');
+    await page.goto('/admin/produtos', { timeout: 60000, waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // 3. Clicar em Gerenciar Categorias
@@ -82,7 +82,7 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
 
   test('Cenário 2: Cadastro de Nova Categoria', async ({ page }) => {
     await loginAdmin(page);
-    await page.goto('/admin/produtos');
+    await page.goto('/admin/produtos', { timeout: 60000, waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Abrir modal
@@ -91,7 +91,7 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
 
     // Preencher formulário
     await page.getByPlaceholder('Ex: Calçados').fill(newCategoryName);
-    
+
     const checkbox = page.locator('#cat-active-checkbox');
     await expect(checkbox).toBeChecked();
 
@@ -108,7 +108,7 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
 
     // Verificar se a categoria aparece listada no modal
     await expect(page.locator('span.font-bold.text-foreground', { hasText: newCategoryName })).toBeVisible();
-    
+
     // Validar a badge Ativa (verde) correspondente à nova categoria
     const categoryRow = page.locator('div.flex.items-center.justify-between').filter({ has: page.locator('span.font-bold.text-foreground', { hasText: newCategoryName }) });
     await expect(categoryRow.locator('span', { hasText: 'Ativa' })).toBeVisible();
@@ -116,7 +116,7 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
 
   test('Cenário 3: Edição de Categoria Existente', async ({ page }) => {
     await loginAdmin(page);
-    await page.goto('/admin/produtos');
+    await page.goto('/admin/produtos', { timeout: 60000, waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     await page.getByRole('button', { name: 'Gerenciar Categorias' }).click();
@@ -158,7 +158,7 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
 
   test('Cenário 4: Cancelamento de Edição de Categoria', async ({ page }) => {
     await loginAdmin(page);
-    await page.goto('/admin/produtos');
+    await page.goto('/admin/produtos', { timeout: 60000, waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     await page.getByRole('button', { name: 'Gerenciar Categorias' }).click();
@@ -183,7 +183,7 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
 
   test('Cenário 5: Tentativa de Inativação de Categoria com Produtos Ativos (Erro)', async ({ page }) => {
     await loginAdmin(page);
-    await page.goto('/admin/produtos');
+    await page.goto('/admin/produtos', { timeout: 60000, waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     await page.getByRole('button', { name: 'Gerenciar Categorias' }).click();
