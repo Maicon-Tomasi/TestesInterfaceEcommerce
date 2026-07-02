@@ -6,40 +6,20 @@ async function searchAndFilterProduct(page: any, productName: string) {
   const searchInput = page.getByPlaceholder('Buscar produtos por nome, descrição ou SKU...');
   await expect(searchInput).toBeVisible();
 
-  // Wait for initial/submit requests to settle
-  await page.waitForTimeout(2000);
-
-  for (let i = 0; i < 5; i++) {
-    await searchInput.click();
-    await searchInput.fill('');
-    await page.waitForTimeout(200);
-
-    // Setup response listener for the filtered search request
-    const responsePromise = page.waitForResponse(
-      (response: any) =>
-        response.url().includes('/api/products/admin') &&
-        response.url().includes(encodeURIComponent(productName)) &&
-        response.status() === 200,
-      { timeout: 5000 }
-    ).catch(() => null);
-
-    await searchInput.fill(productName);
-    await responsePromise;
-    await page.waitForTimeout(500); // Allow React to render table update
-
-    const inputValue = await searchInput.inputValue();
+  // Limpa o campo
+  await searchInput.clear();
+  await page.waitForTimeout(500); // Aguarda debounce de limpeza
+  
+  // Preenche o campo
+  await searchInput.fill(productName);
+  
+  // Aguarda a tabela atualizar (React debounce + API + Render)
+  await expect(async () => {
     const tableText = await page.locator('table').textContent();
     const rowCount = await page.locator('table tbody tr').count();
-
-    if (inputValue === productName && tableText.includes(productName) && rowCount === 1) {
-      return;
-    }
-  }
-
-  const currentInputValue = await searchInput.inputValue();
-  const currentTableText = await page.locator('table').textContent();
-  const currentRowCount = await page.locator('table tbody tr').count();
-  throw new Error(`searchAndFilterProduct failed for "${productName}". Input: "${currentInputValue}", Rows: ${currentRowCount}, Table content: "${currentTableText}"`);
+    expect(tableText).toContain(productName);
+    expect(rowCount).toBe(1);
+  }).toPass({ timeout: 15000 });
 }
 
 test.describe('Painel Administrativo de Produtos - Cenários de Teste', () => {

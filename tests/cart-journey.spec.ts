@@ -147,8 +147,9 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
       await page.getByRole('button', { name: /Acessar Loja/i }).click();
       await page.waitForSelector('text=Minha Conta');
 
-      // Acessar carrinho
-      await page.goto('/carrinho', { timeout: 60000, waitUntil: 'load' });
+      // Acessar carrinho (Navegação SPA para não remontar o StoreContext e gerar race condition no GET /api/cart)
+      await page.locator('a[href="/carrinho"]').first().click();
+      await page.waitForSelector('text=Carrinho de Compras');
 
       // Clicar na lixeira específica do item
       const trashBtn = page.locator('button[aria-label="Remover item"], [data-testid="remove-item"]').first();
@@ -314,6 +315,7 @@ test.describe.serial('Cart Journey (Phase 2) - E2E Completo', () => {
 
   // --- GRUPO 3: Stress, Debounce e Concorrência ---
   test.describe('Grupo 3: Stress, Concorrência e Multi-Clientes', () => {
+    test.setTimeout(120000); // 120 segundos para os testes pesados deste grupo
 
     test('Cenário 3.1: Metralhadora de Cliques (Debounce Validation)', async ({ page, request }) => {
       const helper = new ApiHelper(request);

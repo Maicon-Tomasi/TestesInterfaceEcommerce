@@ -107,6 +107,7 @@ test.describe.serial('Checkout, Pagamentos e Histórico (E2E)', () => {
 
     await page.waitForURL(/\/pedido-confirmado/, { timeout: 30000 });
     await expect(page.locator('text=Pedido Confirmado!')).toBeVisible();
+    await expect(page.locator('text=Pagamento Aprovado com sucesso!')).toBeVisible({ timeout: 15000 });
 
     // Verificar status Pago no Histórico
     await page.goto('/conta', { timeout: 60000, waitUntil: 'load' });

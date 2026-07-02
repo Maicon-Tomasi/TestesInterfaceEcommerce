@@ -22,7 +22,7 @@ async function loginAdmin(page: any) {
   await page.getByPlaceholder('Digite sua senha').fill(process.env.TEST_USER_PASSWORD || 'Admin@123');
   await page.getByRole('button', { name: 'Acessar Loja' }).click();
   await expect(page.getByRole('link', { name: 'Ir para Painel Administrativo' })).toBeVisible({ timeout: 30000 });
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(2000);
 }
 
 test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
@@ -66,7 +66,8 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
     await loginAdmin(page);
 
     // 2. Acessar produtos admin
-    await page.goto('/admin/produtos', { timeout: 60000, waitUntil: 'load' });
+    await page.getByRole('link', { name: 'Ir para Painel Administrativo' }).click();
+    await page.locator('a[href="/admin/produtos"]').click();
     await page.waitForTimeout(1500);
 
     // 3. Clicar em Gerenciar Categorias
@@ -82,7 +83,8 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
 
   test('Cenário 2: Cadastro de Nova Categoria', async ({ page }) => {
     await loginAdmin(page);
-    await page.goto('/admin/produtos', { timeout: 60000, waitUntil: 'load' });
+    await page.getByRole('link', { name: 'Ir para Painel Administrativo' }).click();
+    await page.locator('a[href="/admin/produtos"]').click();
     await page.waitForTimeout(1500);
 
     // Abrir modal
@@ -116,7 +118,8 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
 
   test('Cenário 3: Edição de Categoria Existente', async ({ page }) => {
     await loginAdmin(page);
-    await page.goto('/admin/produtos', { timeout: 60000, waitUntil: 'load' });
+    await page.getByRole('link', { name: 'Ir para Painel Administrativo' }).click();
+    await page.locator('a[href="/admin/produtos"]').click();
     await page.waitForTimeout(1500);
 
     await page.getByRole('button', { name: 'Gerenciar Categorias' }).click();
@@ -158,7 +161,8 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
 
   test('Cenário 4: Cancelamento de Edição de Categoria', async ({ page }) => {
     await loginAdmin(page);
-    await page.goto('/admin/produtos', { timeout: 60000, waitUntil: 'load' });
+    await page.getByRole('link', { name: 'Ir para Painel Administrativo' }).click();
+    await page.locator('a[href="/admin/produtos"]').click();
     await page.waitForTimeout(1500);
 
     await page.getByRole('button', { name: 'Gerenciar Categorias' }).click();
@@ -183,7 +187,8 @@ test.describe.serial('Testes de Gerenciamento de Categorias (Admin)', () => {
 
   test('Cenário 5: Tentativa de Inativação de Categoria com Produtos Ativos (Erro)', async ({ page }) => {
     await loginAdmin(page);
-    await page.goto('/admin/produtos', { timeout: 60000, waitUntil: 'load' });
+    await page.getByRole('link', { name: 'Ir para Painel Administrativo' }).click();
+    await page.locator('a[href="/admin/produtos"]').click();
     await page.waitForTimeout(1500);
 
     await page.getByRole('button', { name: 'Gerenciar Categorias' }).click();
